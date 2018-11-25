@@ -1,4 +1,4 @@
-# Arctic ice coverage and arctic animal species population sizes: How do they vary over time and (how) are they correlated?
+# Arctic ice coverage and arctic animal species population sizes: How do they vary over time and how do they correlate?
 
 In this project, the final project for the programming minor of the University of Amsterdam, a website will be built, showing an interactive data visualisation of arctic ice coverage and the population sizes of several arctic animal species. The aim of this visualisation is to create insight into the correlations that might exist between those variables, and to create awareness of the imminent danger that slow freeze of the arctic poses upon many animal species.
 

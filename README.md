@@ -4,7 +4,7 @@ In this project, the final project for the programming minor of the University o
 
 ## Problem
 
-"The polar caps are melting," is a frequently heard statement in climate change discussions. However, most people do not know that it's actually the arctic freeze rate that needs worrying about, as it seems to decline more and more, and this year even hit a record breaking low. Amongst many people all over the world there is a lack of awareness of the imminent danger this poses for many arctic animal species. Also, the correlation between the arctic ice coverage at certain times of year and size of animal populations needs further investigation, knowledge retrieved from which might be of specific interest to arctic biologist.
+"The polar caps are melting," is a frequently heard statement in climate change discussions. However, most people do not know exactly what this statement entails. The term 'arctic freeze rate' for example is widely unknown, as is the fact that this year it hit a record breaking low. Amongst many people all over the world there is a lack of awareness of the imminent danger this poses for many arctic animal species. Also, the correlation between the arctic ice coverage at certain times of year and size of animal populations needs further investigation, knowledge retrieved from which might be of specific interest to arctic biologist.
 
 ## Solution
 

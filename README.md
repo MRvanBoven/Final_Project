@@ -12,7 +12,7 @@ An interactive website dedicated to arctic ice coverage and population size of c
 
 ### Visual sketch final product
 
-![alt text](https://raw.githubusercontent.com/MRvanBoven/Final_Project/master/vis_sketch.jpg "Visualisation Sketch")
+![alt text](https://github.com/MRvanBoven/Final_Project/blob/master/vis_sketch.jpg "Visualisation Sketch")
 
 __User Interactions__
 

@@ -1,6 +1,6 @@
-# Project Title
+# Arctic ice coverage and arctic animal species population sizes: How do they vary over time and (how) are they correlated?
 
-Paragraph summary of visualisation goals.
+In this project, the final project for the programming minor of the University of Amsterdam, a website will be built, showing an interactive data visualisation of arctic ice coverage and the population sizes of several arctic animal species. The aim of this visualisation is to create insight into the correlations that might exist between those variables, and to create awareness of the imminent danger that slow freeze of the arctic poses upon many animal species.
 
 ## Problem
 
@@ -33,7 +33,7 @@ _MVP_
 * (Estimated) animal populations for each moment on timeline,
 * Line charts ice area and animal populations, which can be, if so chosen by the user, visible simultaneously.
 
-_Optional implementations_
+_Optional Implementations_
 * Annual human CO2 production data and clickable line chart,
 * Markings of specific polar bear population and pregnant female hibernation sites (and show possible troubles in reaching these hibernation sites),
 * Similar markings for other animal species,

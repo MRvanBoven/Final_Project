@@ -13,10 +13,14 @@
  * Loads in local JSON data file and hands it to main.
  */
 window.onload = function() {
+    let requests = [d3.json("test_1979_01.json"),
+                    d3.json("test_1979_02.json"),
+                    d3.json("test_1979_03.json")];
+
     // load in JSON data file
-    Promise.resolve(d3.json("test.json"))
-           .then(function(data) {
-                main(data);
+    Promise.all(requests)
+           .then(function(response) {
+                main(response);
             })
            .catch(function(e) {
                throw(e);
@@ -27,15 +31,15 @@ window.onload = function() {
 /**
  * Main function, started once a successful response has been received.
  */
-function main(map) {
+function main(response) {
+    let map = response[0];
+
     console.log("main");
     console.log(map);
-    // console.log(map.objects.extent_N_197901_polygon_v3.geometries);
-
 
     // define svg dimensions
     let w = (window.innerWidth * 0.95) / 2;
-    let h = w * 1.5;
+    let h = w;
     let margins = {top: 0.05 * w, bottom: 0.05 * h,
                    left: 0.05 * w, right: 0.05 * w},
         width = (w - margins.left - margins.right),
@@ -48,39 +52,25 @@ function main(map) {
                 .attr("width", dims.w)
                 .attr("height", dims.h);
 
-    var geoPath = d3.geoPath()
-                    .projection(d3.geoAlbers()
-                                  .center([0, 0])
-                                  .scale(50)
-                                  .translate([width / 2 + dims.margins.left,
-                                              height / 2 + dims.margins.top]));
+    let projection = d3.geoAzimuthalEquidistant()
+                       .center([0, 0])
+                       .scale(500)
+                       .rotate([0, -90, 0])
+                       .translate([width / 2 + dims.margins.left,
+                                   height / 2 + dims.margins.top]);
 
-    // map.geometries.forEach(function(feature) {
-    //                         feature.geometry = turf.rewind(feature.geometry,
-    //                                                        {reverse:true});
-    //                     });
+    let geoPath = d3.geoPath()
+                    .projection(projection);
 
-    // svg.append("path")
-    //    .datum(map.objects.extent_N_197901_polygon_v3)
-    //    .attr("d", geoPath)
-    //    .style("fill", "#FFFFFF");
+    console.log(2);
 
-    // svg.selectAll("path")
-    //    .data(map.arcs)
-    //    .enter()
-    //    .append("path")
-    //    .attr("d", geoPath)
-    //    .style("fill", "#FFFFFF");
-
-    svg.selectAll("path")
-       .data(topojson.feature(map, map.objects.extent_N_197901_polygon_v3).features)
+    svg.append("g")
+       .selectAll("path")
+       .data(topojson.feature(map, map["objects"]["extent"]).features)
        .enter()
        .append("path")
        .attr("d", geoPath)
        .style("fill", "#FFFFFF");
 
-    // svg.append("path")
-    //    .datum(topojson.feature(map, map.objects.extent_N_197901_polygon_v3))
-    //    .attr("d", geoPath)
-    //    .style("fill", "#FFFFFF");
+    console.log(topojson.feature(map, map["objects"]["extent_N_197901_polygon_v3.0"]).features);
 }

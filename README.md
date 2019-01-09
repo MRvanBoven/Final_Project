@@ -47,7 +47,9 @@ _Optional Implementations_
 
 Databases and sets that may be used in this project include:
 
-* Google Earth archives,
+* [National Snow & Ice Data Center - Sea Ice Index Data](https://nsidc.org/data/seaice_index/)
+  * Arctic Ice Extent Shapefiles (ftp://sidads.colorado.edu/DATASETS/NOAA/G02135/north/monthly/shapefiles/shp_extent/)
+  * Daily Ice Extent CSV (ftp://sidads.colorado.edu/DATASETS/NOAA/G02135/north/daily/data/N_seaice_extent_daily_v3.0.csv)
 * Sea Ice Index NOAA (https://catalog.data.gov/dataset/sea-ice-index),
 * Minimum Annual Arctic Sea Ice Extent (https://data.world/gpsdd/625ff6c3-56c2-4f64-a473-60611a8a1623),
 * Data from: Harvesting wildlife affected by climate change: a modelling and management approach for polar bears, by Regehr EV, Wilson RR, Rode KD, Runge MC, Stern HL (https://datadryad.org/handle/10255/dryad.134106),

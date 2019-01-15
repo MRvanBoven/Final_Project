@@ -1,8 +1,8 @@
 /**
  * This file extends index.html.
  *
- * The file loads in a TopoJSON (or Geo?) file, makes in into a map and adds
- * slider to update maps with over time.  *
+ * The file loads a JSON file, containing several GeoJSON files, makes them into
+ * a map and adds slider to update maps with over time.
  *
  * Name: Maud van Boven
  * Student ID: 12474673
@@ -13,9 +13,7 @@
  * Loads in local JSON data file and hands it to main.
  */
 window.onload = function() {
-    let requests = [d3.json("test_1979_01.json"),
-                    d3.json("test_1979_02.json"),
-                    d3.json("test_1979_03.json")];
+    let requests = [d3.json("try.geojson")];
 
     // load in JSON data file
     Promise.all(requests)
@@ -32,11 +30,6 @@ window.onload = function() {
  * Main function, started once a successful response has been received.
  */
 function main(response) {
-    let map = response[0];
-
-    console.log("main");
-    console.log(map);
-
     // define svg dimensions
     let w = (window.innerWidth * 0.95) / 2;
     let h = w;
@@ -46,31 +39,92 @@ function main(response) {
         height = (h - margins.top - margins.bottom);
     let dims = {w: w, h: h, margins: margins, width: width, height: height};
 
+    // make a map
+    makeMap(response, dims);
+
+    // make a time slider, connected to map
+    makeSlider(response, dims);
+}
+
+
+/**
+ * Makes a slider via which the user can choose of which month data is shown.
+ */
+function makeMap(maps, dims) {
+    // set default map to January 1979
+    let map = maps[0];
+
     // create SVG element
     let svg = d3.select("body")
                 .append("svg")
+                .attr("class", "map")
                 .attr("width", dims.w)
                 .attr("height", dims.h);
 
+    // define map projection
     let projection = d3.geoAzimuthalEquidistant()
                        .center([0, 0])
-                       .scale(500)
+                       .scale(dims.w * 0.6)
                        .rotate([0, -90, 0])
-                       .translate([width / 2 + dims.margins.left,
-                                   height / 2 + dims.margins.top]);
+                       .translate([dims.width / 2 + dims.margins.left,
+                                   dims.height / 2 + dims.margins.top]);
 
+    // define geoPath
     let geoPath = d3.geoPath()
                     .projection(projection);
 
-    console.log(2);
-
+    // add map to svg
     svg.append("g")
        .selectAll("path")
-       .data(topojson.feature(map, map["objects"]["extent"]).features)
+       .data(map.features)
        .enter()
        .append("path")
        .attr("d", geoPath)
        .style("fill", "#FFFFFF");
 
-    console.log(topojson.feature(map, map["objects"]["extent_N_197901_polygon_v3.0"]).features);
+}
+
+
+/**
+ * Makes a slider via which the user can choose of which month data is shown.
+ */
+function makeSlider(maps, dims) {
+    // define slider svg dimensions
+    let h = 100;
+    let w = dims.width + dims.margins.left + dims.margins.right;
+
+    // get array of data for slider values
+    let months = [197901, 197902, 197903];
+
+    // define slider
+    let slider = d3.sliderHorizontal()
+                   .min(d3.min(months))
+                   .max(d3.max(months))
+                   .step(1)
+                   .width(dims.width)
+                   .tickValues(months)
+                   .tickFormat(d3.format("d"))
+                   .on("onchange", function(month) {
+                      return updateMap(maps, month);
+                    });
+
+    // create SVG element and add slider
+    let svg = d3.select("body")
+                .append("svg")
+                .attr("class", "slider")
+                .attr("width", w)
+                .attr("height", h);
+
+    svg.append("g")
+       .attr("transform", "translate(" + dims.margins.left + "," + h / 2 + ")")
+                .call(slider);
+}
+
+
+/**
+ * Updates map via a transition to given month's map.
+ */
+function updateMap(maps, month) {
+    console.log(month);
+    return
 }

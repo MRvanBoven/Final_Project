@@ -9,3 +9,17 @@
   * convert the rest of 1979's months shapefiles via [MyGeodata Converter](https://mygeodata.cloud/converter/shp-to-json), test if I can load them into one TopoJSON, and see if the slider works out,
   * or try to write a Python script to convert my shapefiles to useful TopoJSONs.
 * Development: [MyGeodata Converter](https://mygeodata.cloud/converter/shp-to-json) has a conversion limit of 3 datasets a month, so using this to convert all shapefiles doesn't seem like a good option (although incognito mode may provide a solution). It would be much nicer to have a working script for the conversion anyway. I did, however, convert three sets to useful topoJSONs, with which I can make a very simple test version of the slider.
+
+## Day 4
+* Installation of libraries (GeoPandas, GDAL and shapefile library) to manipulate and convert shapefiles all unsuccessful.
+* Installation of command line [mapshaper](https://github.com/mbloch/mapshaper/blob/master/README.md) succesful. (Finally!)
+
+## Day 5
+* No progress, due to illness.
+
+## Day 6
+* Files converted to WGS84 TopoJSONs with command line mapshaper are not compatible with D3 geo.
+* Found [GeoConverter](https://geoconverter.hsr.ch/), an online converter that allows the output coordinate reference system (EPSG) to be defined as WGS84 (EPSG no. 4326), accept batch input, and can convert to output GeoJSON files.
+* So now GeoJSON input in D3 instead of TopoJSON.
+* Usable GeoJSONs of all maps dowloaded. Will now write a (python) script to combine those to one JSON file, in order to reduce input load on website.
+* Simple slider was added to JavaScript script, to test map transitions with. 

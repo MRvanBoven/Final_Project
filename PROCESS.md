@@ -22,4 +22,11 @@
 * Found [GeoConverter](https://geoconverter.hsr.ch/), an online converter that allows the output coordinate reference system (EPSG) to be defined as WGS84 (EPSG no. 4326), accept batch input, and can convert to output GeoJSON files.
 * So now GeoJSON input in D3 instead of TopoJSON.
 * Usable GeoJSONs of all maps dowloaded. Will now write a (python) script to combine those to one JSON file, in order to reduce input load on website.
-* Simple slider was added to JavaScript script, to test map transitions with. 
+* Simple slider was added to JavaScript script, to test map transitions with.
+
+## Day 7
+* JSONmerger.py works and outputs a very big json file containing all GeoJSONs.
+* The file might be so large that it will be hard to use on my website. Options to fix this:
+  * Put it online?
+  * First convert all GeoJSONs to TopoJSONs, which are about 75% smaller. Problem now: converting to TopoJSON with mapshaper command line gives a file with presumably the wrong winding order, so the TopoJSON isn't functional yet.
+  * Use only 20 or even 10 years of data. (Would be a shame, though.)

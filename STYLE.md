@@ -33,7 +33,7 @@ let svg = d3.select("body")
 
 ## Personal Style Preferences
 
-# D3
+### D3
 *  For indentation when using functions inside D3 methods, I chose to indent everything inside the function four spaces from the dot, and to place the ending accolade on a new line, one place right from the dotline. Example:
 ```
 dots.attr("cx", function(d) {

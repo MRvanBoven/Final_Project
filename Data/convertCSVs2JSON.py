@@ -8,8 +8,8 @@ combined dataset to a JSON output file.
 
 import csv
 import json
+import math
 import numpy as np
-import os
 import os
 import pandas as pd
 from functools import reduce
@@ -57,7 +57,8 @@ def preprocess(df):
     df['Extent'] = pd.to_numeric(df['Extent'], errors='coerce')
 
     # calculate average of each month for every year and group data as such
-    df = df.groupby(['Year', 'Month'], as_index=False, sort=False).mean()
+    df = df.groupby(['Year', 'Month'],
+                    as_index=False, sort=False).mean().round(3)
 
     return df
 
@@ -69,44 +70,60 @@ def to_dictionary(df):
 
     dict = {}
 
-    # get unique month & year values, sort them, save them as 1st & 2nd keys
-    first_keys = list(df['Month'].unique())
-    first_keys.sort()
-    second_keys = list(df['Year'].unique())
-    second_keys.sort()
+    # get unique month & year values, sort them, save them in key lists
+    month_keys = list(df['Month'].unique())
+    month_keys.sort()
+    year_keys = list(df['Year'].unique())
+    year_keys.sort()
 
     # give dict month:{year:{CH4,CO2,CO,N2O,SF6,ice}} structure and fill in data
-    for key1 in first_keys:
-        key1 = int(key1)
-        dict[key1] = {}
-        for key2 in second_keys:
-            key2 = int(key2)
-            dict[key1][key2] = {"CH4": df.loc[(df['Month'] == key1)
-                                              & (df['Year'] == key2),
-                                              'CH4'].iloc[0],
-                                "CO": df.loc[(df['Month'] == key1)
-                                              & (df['Year'] == key2),
+    for mon in month_keys:
+
+        # get month keys in two digits each (to match map data of ice extent)
+        if not len(str(mon)) == 2:
+            month = f"0{str(mon)}"
+        else:
+            month = str(mon)
+
+        dict[month] = {}
+
+        for year in year_keys:
+
+            # convert to int, for comparing values now and writing to json later
+            year = int(year)
+
+            # save greenhouse gases and ice extent data matching month and year
+            dict[month][year] = {"CH4": df.loc[(df['Month'] == mon)
+                                               & (df['Year'] == year),
+                                               'CH4'].iloc[0],
+                                 "CO": df.loc[(df['Month'] == mon)
+                                              & (df['Year'] == year),
                                               'CO'].iloc[0],
-                                "CO2": df.loc[(df['Month'] == key1)
-                                              & (df['Year'] == key2),
+                                 "CO2": df.loc[(df['Month'] == mon)
+                                               & (df['Year'] == year),
                                               'CO2'].iloc[0],
-                                "N2O": df.loc[(df['Month'] == key1)
-                                              & (df['Year'] == key2),
+                                 "N2O": df.loc[(df['Month'] == mon)
+                                               & (df['Year'] == year),
                                               'N2O'].iloc[0],
-                                "SF6": df.loc[(df['Month'] == key1)
-                                              & (df['Year'] == key2),
-                                              'SF6'].iloc[0],
-                                "Extent": df.loc[(df['Month'] == key1)
-                                                  & (df['Year'] == key2),
+                                 "SF6": df.loc[(df['Month'] == mon)
+                                               & (df['Year'] == year),
+                                               'SF6'].iloc[0],
+                                 "Extent": df.loc[(df['Month'] == mon)
+                                                  & (df['Year'] == year),
                                                   'Extent'].iloc[0]
                                 }
+
+            # replace NaN with None to get valid JSON later
+            for key in dict[month][year]:
+                if math.isnan(dict[month][year][key]):
+                    dict[month][year][key] = None
 
     return dict
 
 
 if __name__ == "__main__":
 
-    # create dataframes of all files in path directory and save them in a dict
+    # create dataframes of all csv files in path directory, save them in a dict
     filelist = os.listdir(PATH)
     dataframes = {}
     for file in filelist:
@@ -119,6 +136,7 @@ if __name__ == "__main__":
                 else:
                     df = pd.read_csv(infile, sep=';')
 
+                # use filename without '.csv' as key
                 dataframes[file[:-4]] = df
 
                 infile.close()
@@ -129,7 +147,7 @@ if __name__ == "__main__":
     # combine all dataframes to one dataframe
     df = combine(dataframes)
 
-    # only preserve data from the years 1998-2017
+    # only preserve data from the years 1998-2017 and replace NaN with None
     df = df[df['Year'].isin(list(range(1998, 2018)))]
 
     # convert dataframe to nested dictionary

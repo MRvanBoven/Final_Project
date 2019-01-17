@@ -17,7 +17,11 @@
 
 ### D3
 *  Use a new line for every added method, and keep the dots preceding these on the same indentation level. For example:
-`code`
+`let svg = d3.select("body")
+            .append("svg")
+            .attr("class", "slider")
+            .attr("width", w)
+            .attr("height", h);`
 
 ### CSS
 *  Define static styles in CSS.
@@ -25,6 +29,6 @@
 ### Personal Style Preferences
 *  Indentation when using D3...
 
-## Online Style Guides 
+## Online Style Guides
 * [JavaScript](https://github.com/airbnb/javascript)
 * [D3](https://northlandia.wordpress.com/2014/10/23/ten-best-practices-for-coding-with-d3/)

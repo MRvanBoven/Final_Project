@@ -30,3 +30,12 @@
   * Put it online?
   * First convert all GeoJSONs to TopoJSONs, which are about 75% smaller. Problem now: converting to TopoJSON with mapshaper command line gives a file with presumably the wrong winding order, so the TopoJSON isn't functional yet.
   * Use only 20 or even 10 years of data. (Would be a shame, though.)
+
+## Day 8
+* Because I want to implement an option to filter on a specific month, I rearranged the JSONmerger a bit, to let months be the first keys, and years the second, so that the maps of a specific month can easily be selected.
+* Using 10 years of data, instead of the full 40, gives rise to a file of about 25% the size of the full data, as expected. This is still quite some to process for the site, but it solves the loading problem partially. Because having more data in this case will show the decay of the arctic ice extent much better, for now I still opt for using all 40 years of data. However, showing 480 months on a slider might be a lot to ask, so perhaps 20 or 10 years will be chosen after all.
+* For testing, I now use one year, so that the site loads rather fast.
+* Found great [example of slider](https://bl.ocks.org/officeofjane/47d2b0bfeecfcb41d2212d06d095c763) with exactly the same features as I want for my visualisation, so implemented slider following this example.
+* Slider needs to be made ordinal (with discrete month steps instead of continuous). This hopefully also solves current problem of not (always) reaching final value when using play button. (Although that might also (partially) be due to the if statement defining when to stop playing.) [Step slider example that might be useful](https://bl.ocks.org/shashank2104/d7051d80e43098bf9a48e9b6d3e10e73)
+* Maps successfully linked to slider. No transition yet, would be nice for later.
+* Issue that might also be solved with making slider ordinal: maps now updated for every minor movement of slider.

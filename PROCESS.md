@@ -39,3 +39,9 @@
 * Slider needs to be made ordinal (with discrete month steps instead of continuous). This hopefully also solves current problem of not (always) reaching final value when using play button. (Although that might also (partially) be due to the if statement defining when to stop playing.) [Step slider example that might be useful](https://bl.ocks.org/shashank2104/d7051d80e43098bf9a48e9b6d3e10e73)
 * Maps successfully linked to slider. No transition yet, would be nice for later.
 * Issue that might also be solved with making slider ordinal: maps now updated for every minor movement of slider.
+
+## Day 9
+* Found atmospheric greenhouse gases concentration data, measured on Svalbard, by the [ESRL Global Monitoring Division](https://www.esrl.noaa.gov/gmd/dv/data/index.php?pageID=2&category=Greenhouse%2BGases&frequency=Monthly%2BAverages&site=ZEP]) The Svalbard part is great, because this is a location on the arctic.
+* Here I found data about CH4, CO, CO2, NO2, and SF6, almost complete from 1998 to 2017. So hereby it's decided that I will also use the maps of this period.
+* Concentration data missing: 2010-10 & 2010-11 CO2. From [this dataset](ftp://aftp.cmdl.noaa.gov/data/trace_gases/co2/flask/surface/co2_zep_surface-flask_1_ccgg_event.txt) of the same institute, it is clear that the values measured in this month were remarkably high and had a high uncertainty. This could have been due to measurement errors, equipment malfunction, or something of the sort. Because this data seems untrustworthy, it is not used to replace the missing data.
+* Wrote Python script to combine all csv files into one JSON output file, with same nested structure as allmaps-JSON file (month = first key, year = second), with info of years 1998-2017. The similar structure will be useful for selecting data per month.

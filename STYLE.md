@@ -18,16 +18,26 @@
 ### D3
 *  Use a new line for every added method, and keep the dots preceding these on the same indentation level. For example:
 `let svg = d3.select("body")
-            .append("svg")
-            .attr("class", "slider")
-            .attr("width", w)
-            .attr("height", h);`
+             .append("svg")
+             .attr("class", "slider")
+             .attr("width", w)
+             .attr("height", h);`
 
 ### CSS
 *  Define static styles in CSS.
 
 ### Personal Style Preferences
-*  Indentation when using D3...
+*  For indentation when using functions inside D3 methods, I chose to indent everything inside the function four spaces from the dot, and to place the ending accolade on a new line, one place right from the dotline. Example:
+`dots.attr("cx", function(d) {
+          return xScale(d[1]);
+      })
+     .attr("cy", function(d) {
+          return yScale(d[2]);
+      })
+     .attr("r", 10)
+     .style("fill", function(d) {
+          return counColors[d[0]];
+      });`
 
 ## Online Style Guides
 * [JavaScript](https://github.com/airbnb/javascript)

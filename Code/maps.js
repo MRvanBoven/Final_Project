@@ -13,7 +13,8 @@
  * Loads in local JSON data file and hands it to main.
  */
 window.onload = function() {
-    let requests = [d3.json("oneyear.json")];
+    let requests = [d3.json("geoJSONs_1998-2017.json"),
+                    d3.json("ice_area+gg(1998-2017).json")];
 
     // load in JSON data file
     Promise.all(requests)
@@ -30,7 +31,8 @@ window.onload = function() {
  * Main function, started once a successful response has been received.
  */
 function main(response) {
-    let maps = response[0];
+    let maps = response[0],
+        iceAndGg = response[1];
 
     // define svg dimensions
     let w = (window.innerWidth * 0.95) / 2;
@@ -41,12 +43,120 @@ function main(response) {
         height = (h - margins.top - margins.bottom);
     let dims = {w: w, h: h, margins: margins, width: width, height: height};
 
-    // make a map of default month, january 1979
-    makeMap(maps["01"]["1979"], dims);
+    // make a map of default month, january 1998
+    makeMap(maps["01"]["1998"], dims);
+
+    let xScale = makeXScale(maps, dims);
 
     // make a time slider, connected to map
-    makeSlider(makeXScale(maps, dims), dims, maps);
+    makeSlider(xScale, dims, maps);
+
+    // make a line chart of data
+    makeLineChart(iceAndGg, dims, xScale);
 }
+
+
+/**
+* Makes a line chart of given input data.
+*/
+function makeLineChart(data, dims, xScale) {
+    // create SVG element
+    let svg = d3.select("#line-chart-div")
+                .append("svg")
+                .attr("class", "lineChart")
+                .attr("width", dims.w)
+                .attr("height", dims.h);
+
+    // make Y scales
+    // let yScales = makeYScales(data, dims);
+    let yScale = d3.scaleLinear()
+                   .domain([0, 1])
+                   .range([dims.height, 0]);
+
+    // make axes
+    axes(svg, xScale, yScale, dims);
+
+    let line = d3.line()
+                 .x(function(d, i) {
+                      return xScale(i);
+                  })
+                 .y(function(d) {
+                     return yScale(d.y);
+                  })
+                 .curve(curveMonotoneX);
+
+    // let g = svg.append("g")
+    //    .attr("transform", "translate(" + dims.margins.left
+    //                                    + ","
+    //                                    + dims.margins.top
+    //                                    + ")");
+
+    // add x and y axis
+    svg.append("g")
+       .attr("class", "x axis")
+       .call(d3.axisBottom(xScale));
+    svg.append("g")
+       .attr("class", "y axis")
+       .call(d3.axisLeft(yScale));
+
+}
+
+
+/**
+* Makes y scales for all data corresponding to each month + year entry.
+*/
+function makeYScales(data, dims) {
+    console.log(data);
+
+    let yScale
+
+    return yScales;
+}
+
+
+/**
+ * Defines, creates, and adds labels to the x and y axis.
+ */
+function axes(svg, xScale, yScale, dims) {
+    // define x axis
+    var xAxis = d3.axisBottom()
+                  .scale(xScale);
+
+    // define y axis
+    var yAxis = d3.axisLeft()
+                  .scale(yScale);
+
+    // create x axis
+    svg.append("g")
+       .attr("class", "axis")
+       .attr("transform", "translate(0," + (dims.margins.top + dims.height)
+                                         + ")")
+       .call(xAxis);
+
+    // create y axis
+    svg.append("g")
+       .attr("class", "axis")
+       .attr("transform", "translate(" + dims.margins.left + ", 0)")
+       .call(yAxis);
+
+    // add label x axis
+    svg.append("text")
+       .attr("class", "label")
+       .attr("x", dims.margins.left + dims.width / 2)
+       .attr("y", dims.margins.top + dims.height + dims.margins.bottom)
+       .style("text-anchor", "middle")
+       .text("Time");
+
+    // add label y axis
+    svg.append("text")
+       .attr("class", "label")
+       .attr("transform", "rotate(-90)")
+       .attr("x", - dims.margins.top - dims.height / 2)
+       .attr("y", dims.margins.left / 5)
+       .style("text-anchor", "middle")
+       .text("Different axes? :O At least: Ice Area (perhaps downward?)");
+}
+
 
 
 /**
@@ -116,12 +226,11 @@ function makeMap(map, dims) {
     svg.append("g")
        .attr("id", "map-g")
        .selectAll("path")
-       .data(map.features)//topojson.feature(map, map["objects"]["geo"]).features)
+       .data(map.features)
        .enter()
        .append("path")
        .attr("d", geoPath)
        .style("fill", "#FFFFFF");
-
 }
 
 
@@ -272,20 +381,13 @@ function updateMap(maps, month, year, dims) {
     let map = maps[month][year];
     console.log(map);
 
-    // select map's svg element
+    // remove map's svg element
     let svg = d3.select(".map");
-    // let g = d3.select("#map-g");
-    //
-    // g.selectAll("path")
-    //  .transition()
-    //  .duration(2000)
-    //  .remove()
-
-    // g.remove();
     svg.remove();
 
     makeMap(map, dims);
 
+    // transition??
     // g.selectAll("path")
     //  .data(map.features)
      // .attrTween("d", function(d) {
@@ -296,70 +398,3 @@ function updateMap(maps, month, year, dims) {
      //      }
      //  });
 }
-
-//
-// /**
-//  * Updates donut chart with given gender ratio dat, via transitions.
-//  */
-// function updateDonut(data, dims) {
-//     // get character gender ratio data of all series
-//     let genders = findGenderRatio(data);
-//
-//     // define pie division
-//     let pie = d3.pie(genders)
-//                 .padAngle(0.005)
-//                 .sort(null)
-//                 .value(function(d) {
-//                      return d["value"];
-//                  });
-//
-//     // define arcs
-//     let arc = d3.arc()
-//                 .innerRadius(dims.radius * 0.7)
-//                 .outerRadius(dims.radius);
-//
-//     let arcs = pie(genders);
-//
-//     // define arc transitions
-//     d3.select("#donut")
-//       .selectAll("path")
-//       .data(arcs)
-//       .transition()
-//       .duration(750)
-//       .attrTween("d", function(d) {
-//           let interpol = d3.interpolate(this._current, d);
-//           this._current = interpol(0);
-//           return function(t) {
-//               return arc(interpol(t));
-//           };
-//       });
-//
-//     // define label transitions
-//     d3.select("#donut")
-//       .selectAll("text")
-//       .data(arcs)
-//       .transition()
-//       .duration(750)
-//       .attrTween("transform", function(d) {
-//            let interpol = d3.interpolate(this._current, d);
-//            this._current = interpol(0);
-//            return function(t) {
-//                return "translate(" + arc.centroid(interpol(t)) + ")";
-//            };
-//        })
-//       .attr("display", function(d) {
-//            return (d.value !== 0) ? null : "none";
-//        });
-//
-//     // define title transitions, scaling font size to fit inside donut
-//     d3.select("#donutTitle")
-//       .selectAll("text")
-//       .transition()
-//       .duration(750)
-//       .style("opacity", 0)
-//       .transition()
-//       .duration(750)
-//       .style("opacity", 1)
-//       .style("font-size", `${dims.width * 1.3 / (data.name.length)}px`)
-//       .text(data.name);
-// }

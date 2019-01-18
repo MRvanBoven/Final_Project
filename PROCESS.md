@@ -45,3 +45,8 @@
 * Here I found data about CH4, CO, CO2, NO2, and SF6, almost complete from 1998 to 2017. So hereby it's decided that I will also use the maps of this period.
 * Concentration data missing: 2010-10 & 2010-11 CO2. From [this dataset](ftp://aftp.cmdl.noaa.gov/data/trace_gases/co2/flask/surface/co2_zep_surface-flask_1_ccgg_event.txt) of the same institute, it is clear that the values measured in this month were remarkably high and had a high uncertainty. This could have been due to measurement errors, equipment malfunction, or something of the sort. Because this data seems untrustworthy, it is not used to replace the missing data.
 * Wrote Python script to combine all csv files into one JSON output file, with same nested structure as allmaps-JSON file (month = first key, year = second), with info of years 1998-2017. The similar structure will be useful for selecting data per month.
+
+## Day 10
+* Line chart added. By default it shows the ice extent area. Later, when greenhouse gas data can be added, a right side y axis might be needed, for the gases can probably use the same axis, but they cannot share the ice area axis. Another option is to change it into an area graph and show the ice area underneath the x axis, and the greenhouse gases above it.
+* All scales (time, ice area, gases) are saved in an object, with the variable name corresponding to the scale as key. Like this they can be easily selected later, when data will be added to or removed from the line chart.
+* All variable data was also converted to lists of objects like {"date": corresponding time, "value": value}. Like this they are easily accessible and compatible for the line graph, amongst other uses. 

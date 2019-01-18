@@ -13,7 +13,7 @@
  * Loads in local JSON data file and hands it to main.
  */
 window.onload = function() {
-    let requests = [d3.json("geoJSONs_1998-2017.json"),
+    let requests = [d3.json("geoJSONs_1998.json"),
                     d3.json("ice_area+gg(1998-2017).json")];
 
     // load in JSON data file
@@ -46,71 +46,160 @@ function main(response) {
     // make a map of default month, january 1998
     makeMap(maps["01"]["1998"], dims);
 
-    let xScale = makeXScale(maps, dims);
+    let times = sortTime(maps);
+    let iceGgLists = convertToLists(iceAndGg, times);
+    let scales = makeScales(times, iceGgLists, dims);
 
     // make a time slider, connected to map
-    makeSlider(xScale, dims, maps);
+    makeSlider(scales["Time"], dims, maps);
 
-    // make a line chart of data
-    makeLineChart(iceAndGg, dims, xScale);
+    // make a line chart, showing ice extent data by default
+    makeLineChart(iceGgLists["Extent"], dims, scales["Extent"]);
 }
 
 
 /**
-* Makes a line chart of given input data.
-*/
-function makeLineChart(data, dims, xScale) {
+ * Makes time scale from input times, and scales for all variables in input
+ * dataLists. Returns all scales in object, with variable name as key.
+ */
+function makeScales(times, dataLists, dims) {
+    let scales = {};
+
+    // make scales for all variables in data
+    for (i in dataLists) {
+        scales[i] = d3.scaleLinear()
+                      .domain(d3.extent(dataLists[i], y => y["value"]))
+                      .range([dims.height, 0]);
+    }
+
+    // add a time scale, made from the input times
+    scales["Time"] = d3.scaleTime()
+                       .domain(d3.extent(times))
+                       .range([0, dims.width])
+                       .clamp(true);
+
+    return(scales);
+}
+
+
+/**
+ * Makes a line chart of given input data.
+ */
+function makeLineChart(data, dims, yScale) {
+    xScale1 = d3.scaleTime()
+               .domain(d3.extent(data, d => d["date"]))
+               .range([0, dims.width * 2]);
+
+    let parseTime = d3.timeParse("%Y-%m");
+
     // create SVG element
     let svg = d3.select("#line-chart-div")
                 .append("svg")
                 .attr("class", "lineChart")
-                .attr("width", dims.w)
+                .attr("width", dims.w * 2)
                 .attr("height", dims.h);
 
-    // make Y scales
-    // let yScales = makeYScales(data, dims);
-    let yScale = d3.scaleLinear()
-                   .domain([0, 1])
-                   .range([dims.height, 0]);
+    let g = svg.append("g")
+               .attr("class", "line-chart")
+               .attr("transform", "translate(" + dims.margins.left
+                                               + ","
+                                               + dims.margins.top
+                                               + ")");
 
     // make axes
-    axes(svg, xScale, yScale, dims);
+    axes(svg, xScale1, yScale, dims);
 
     let line = d3.line()
-                 .x(function(d, i) {
-                      return xScale(i);
+                 .x(function(d) {
+                      return xScale1(d["date"]);
                   })
                  .y(function(d) {
-                     return yScale(d.y);
-                  })
-                 .curve(curveMonotoneX);
+                      return yScale(d["value"]);
+                  });
+                 // .curve(d3.curveMonotoneX);
 
-    // let g = svg.append("g")
-    //    .attr("transform", "translate(" + dims.margins.left
-    //                                    + ","
-    //                                    + dims.margins.top
-    //                                    + ")");
+    g.append("path")
+     .data([data])
+     .attr("class", "line")
+     .attr("d", line)
+     // .style("fill", "none")
+     .style("stroke", "white");
 
-    // add x and y axis
-    svg.append("g")
-       .attr("class", "x axis")
-       .call(d3.axisBottom(xScale));
-    svg.append("g")
-       .attr("class", "y axis")
-       .call(d3.axisLeft(yScale));
+    // create dots for scatter plot
+    let dots = g.selectAll("circle:not(.legendCirc)")
+                .data(data)
+                .enter()
+                .append("circle");
 
+    // define properties of dots
+    dots.attr("cx", function(d) {
+             return xScale1(d["date"]);
+         })
+        .attr("cy", function(d) {
+             return yScale(d["value"]);
+         })
+        .attr("r", 3)
+        .style("fill", function(d) {
+             return "white";
+         });
 }
 
 
 /**
-* Makes y scales for all data corresponding to each month + year entry.
-*/
-function makeYScales(data, dims) {
-    console.log(data);
+ * Converts variables corresponding to month + year to lists. Returns object with
+ * these lists saved under keys of the variable names. Format is usable for
+ * making scales and plots.
+ */
+function convertToLists(data, times) {
+    // get names of variables by entering first month & year
+    let month1 = Object.keys(data)[0],
+        year1 = Object.keys(data[month1])[0];
+    let vars = Object.keys(data[month1][year1]);
 
-    let yScale
 
-    return yScales;
+    let getYear = d3.timeFormat("%Y"),
+        getMonth = d3.timeFormat("%m");
+
+    // transform data to dict with lists for each var, ordered chronologically
+    let dataLists = {}
+    for (i in times) {
+        let year = getYear(times[i]),
+            month = getMonth(times[i]);
+
+        for (j in vars) {
+            if (vars[j] in dataLists) {
+                dataLists[vars[j]].push({"date": times[i],
+                                         "value": Number(data[month][year]
+                                                         [vars[j]])
+                                        });
+            }
+            else {
+                dataLists[vars[j]] = [{"date": times[i],
+                                       "value": Number(data[month][year]
+                                                       [vars[j]])
+                                      }];
+            }
+        }
+    }
+
+    return dataLists;
+}
+
+
+/**
+ * Makes y scales for all data corresponding to each month + year entry.
+ */
+function makeYScales(dataLists, dims) {
+    // make scales for all variables in data
+    let scales = {};
+    for (i in dataLists) {
+        // let values = dataLists[i].map(x => x["value"]);
+        scales[i] = d3.scaleLinear()
+                      .domain(d3.extent(dataLists[i], y => y["value"]))//[d3.min(values), d3.max(values)])
+                      .range([dims.height, 0]);
+    }
+
+    return scales;
 }
 
 
@@ -129,14 +218,19 @@ function axes(svg, xScale, yScale, dims) {
     // create x axis
     svg.append("g")
        .attr("class", "axis")
-       .attr("transform", "translate(0," + (dims.margins.top + dims.height)
-                                         + ")")
+       .attr("transform", "translate(" + dims.margins.left
+                                       + ","
+                                       + (dims.margins.top + dims.height)
+                                       + ")")
        .call(xAxis);
 
     // create y axis
     svg.append("g")
        .attr("class", "axis")
-       .attr("transform", "translate(" + dims.margins.left + ", 0)")
+       .attr("transform", "translate(" + dims.margins.left
+                                       + ","
+                                       + dims.margins.top
+                                       + ")")
        .call(yAxis);
 
     // add label x axis
@@ -158,14 +252,12 @@ function axes(svg, xScale, yScale, dims) {
 }
 
 
-
-/**
- * Gets time ticks for slider from input json file.
- */
-function makeXScale(json, dims) {
-    // get years (first keys) from json, make sure they're sorted old -> new
+function sortTime(json) {
+    // get months (first keys) from json, sort chronologically
     let months = Object.keys(json);
     months.sort();
+
+    let parseTime = d3.timeParse("%Y-%m");
 
     // create empty array to save time values in
     let times = [];
@@ -182,14 +274,27 @@ function makeXScale(json, dims) {
         }
     }
 
-    // sort times to get historical order
+    // sort times chronologically
     times.sort();
-    console.log(times);
+
+    // convert times to D3 time format
+    for (i in times) {
+        times[i] = parseTime(times[i]);
+    }
+
+    return times;
+}
+
+
+/**
+ * Gets time ticks for slider from input json file.
+ */
+function makeXScale(times, dims) {
+    let parseTime = d3.timeParse("%Y-%m");
 
     // create an ordinal x scale with the time data
     var xScale = d3.scaleTime()
-                   .domain([Date.parse(times[0]),
-                            Date.parse(times[times.length - 1])])
+                   .domain(d3.extent(times))
                    .range([0, dims.width])
                    .clamp(true);
                    // .ticks(d3.timeMonth);
@@ -273,16 +378,12 @@ function makeSlider(xScale, dims, maps) {
           .attr("x2", xScale.range()[1]);
 
     d3.select(slider.node().appendChild(track.node().cloneNode()))
-          .attr("class", "track-inset");
+      .attr("class", "track-inset");
 
+    // create handle, marking current position on slider
     let handle = slider.append("circle", "track-overlay")
                        .attr("class", "handle")
                        .attr("r", 10);
-                     // .call(d3.drag()
-                     //         .on("start", dragging)
-                     //         .on("drag", dragging)
-                     //         .on("end", function() {console.log("blub2")})
-                     //  );
 
     d3.select(slider.node().appendChild(track.node().cloneNode()))
       .attr("class", "track-overlay")
@@ -300,18 +401,22 @@ function makeSlider(xScale, dims, maps) {
           .data(xScale.ticks())
           .enter()
           .append("text")
+          // .attr("class", "ticks")
           .attr("x", xScale)
           .attr("y", h / 4)
           .attr("text-anchor", "middle")
           .text(function(d) {
               return formatYear(d);
-          });
+           })
+          .style("fill", "white"); // better via css, but not working
 
+    // create label showing current slider position above handle
     let label = slider.append("text")
                       .attr("class", "label")
                       .attr("text-anchor", "middle")
                       .text(formatMonthYear(xScale.domain()[0]))
-                      .attr("transform", "translate(0," + (- h / 4) + ")");
+                      .attr("transform", "translate(0," + (- h / 4) + ")")
+                      .style("fill", "white"); // better via css, but not working
 
     // define what happens when play button is clicked
     playButton.on("click", function() {
@@ -379,7 +484,7 @@ function makeSlider(xScale, dims, maps) {
  */
 function updateMap(maps, month, year, dims) {
     let map = maps[month][year];
-    console.log(map);
+    console.log("update");
 
     // remove map's svg element
     let svg = d3.select(".map");

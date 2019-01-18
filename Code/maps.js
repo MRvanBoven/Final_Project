@@ -46,8 +46,13 @@ function main(response) {
     // make a map of default month, january 1998
     makeMap(maps["01"]["1998"], dims);
 
+    // get list of chronologically sorted time values
     let times = sortTime(maps);
+
+    // convert ice and greenhouse gas data to chronologically sorted lists
     let iceGgLists = convertToLists(iceAndGg, times);
+
+    // make scales for time, ice, and greenhouse gases
     let scales = makeScales(times, iceGgLists, dims);
 
     // make a time slider, connected to map
@@ -116,13 +121,12 @@ function makeLineChart(data, dims, yScale) {
                  .y(function(d) {
                       return yScale(d["value"]);
                   });
-                 // .curve(d3.curveMonotoneX);
+                 // .curve(d3.curveMonotoneX); Should I use this --> question!!
 
     g.append("path")
      .data([data])
      .attr("class", "line")
      .attr("d", line)
-     // .style("fill", "none")
      .style("stroke", "white");
 
     // create dots for scatter plot
@@ -187,23 +191,6 @@ function convertToLists(data, times) {
 
 
 /**
- * Makes y scales for all data corresponding to each month + year entry.
- */
-function makeYScales(dataLists, dims) {
-    // make scales for all variables in data
-    let scales = {};
-    for (i in dataLists) {
-        // let values = dataLists[i].map(x => x["value"]);
-        scales[i] = d3.scaleLinear()
-                      .domain(d3.extent(dataLists[i], y => y["value"]))//[d3.min(values), d3.max(values)])
-                      .range([dims.height, 0]);
-    }
-
-    return scales;
-}
-
-
-/**
  * Defines, creates, and adds labels to the x and y axis.
  */
 function axes(svg, xScale, yScale, dims) {
@@ -251,7 +238,9 @@ function axes(svg, xScale, yScale, dims) {
        .text("Different axes? :O At least: Ice Area (perhaps downward?)");
 }
 
-
+/**
+ * Converts times from input JSON to chronologically sorted list. Returns list.
+ */
 function sortTime(json) {
     // get months (first keys) from json, sort chronologically
     let months = Object.keys(json);
@@ -283,24 +272,6 @@ function sortTime(json) {
     }
 
     return times;
-}
-
-
-/**
- * Gets time ticks for slider from input json file.
- */
-function makeXScale(times, dims) {
-    let parseTime = d3.timeParse("%Y-%m");
-
-    // create an ordinal x scale with the time data
-    var xScale = d3.scaleTime()
-                   .domain(d3.extent(times))
-                   .range([0, dims.width])
-                   .clamp(true);
-                   // .ticks(d3.timeMonth);
-                   // .rangePoints([0, ticks.length - 1]);
-
-    return(xScale);
 }
 
 

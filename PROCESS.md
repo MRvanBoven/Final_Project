@@ -49,4 +49,5 @@
 ## Day 10
 * Line chart added. By default it shows the ice extent area. Later, when greenhouse gas data can be added, a right side y axis might be needed, for the gases can probably use the same axis, but they cannot share the ice area axis. Another option is to change it into an area graph and show the ice area underneath the x axis, and the greenhouse gases above it.
 * All scales (time, ice area, gases) are saved in an object, with the variable name corresponding to the scale as key. Like this they can be easily selected later, when data will be added to or removed from the line chart.
-* All variable data was also converted to lists of objects like {"date": corresponding time, "value": value}. Like this they are easily accessible and compatible for the line graph, amongst other uses. 
+* All variable data was also converted to lists of objects like {"date": corresponding time, "value": value}. Like this they are easily accessible and compatible for the line graph, amongst other uses.
+* Idea from mentor session: add loading icon to page while uploading GeoJSON data. Will be nice for user to see that the page is working on something. 

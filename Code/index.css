@@ -64,6 +64,25 @@
     stroke-width: 1.25px;
 }
 
+
+/* define axis styles */
+.axis path, .axis line {
+    fill: none;
+    stroke: black;
+    shape-rendering: crispEdges;
+}
+.axis text {
+    font-size: 11px;
+}
+.x.axis path {
+    stroke: none;
+}
+.label {
+    font-size: 12px;
+}
+
+
+
 /* define general HTML elements and classes styles */
 body {
     color: #EAEAEA;

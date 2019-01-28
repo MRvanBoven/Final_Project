@@ -50,4 +50,14 @@
 * Line chart added. By default it shows the ice extent area. Later, when greenhouse gas data can be added, a right side y axis might be needed, for the gases can probably use the same axis, but they cannot share the ice area axis. Another option is to change it into an area graph and show the ice area underneath the x axis, and the greenhouse gases above it.
 * All scales (time, ice area, gases) are saved in an object, with the variable name corresponding to the scale as key. Like this they can be easily selected later, when data will be added to or removed from the line chart.
 * All variable data was also converted to lists of objects like {"date": corresponding time, "value": value}. Like this they are easily accessible and compatible for the line graph, amongst other uses.
-* Idea from mentor session: add loading icon to page while uploading GeoJSON data. Will be nice for user to see that the page is working on something. 
+* Idea from mentor session: add loading icon to page while uploading GeoJSON data. Will be nice for user to see that the page is working on something.
+
+## Day 11 (sort of)
+* Bootstrap used for lay out of page. For now divs set in bootstrap grid. Later other functionalities of Bootstrap, like a nav bar and dropdown, may also be used.
+  * The dimensions of svg elements and specific propeties of graphs/charts are no longer defined in main, but in the function making the svg and element.
+  * Because it is nice when the page loads with sizes adjusted to window width, the width of the bootstrap-divided divs is obtained in JavaScript via document.getElementById("div-name").offsetWidth.
+* All scales are made in one function and returned in an object. This gives the opportunity to use the scales in various functions, without having to create them again. Because every graph/chart may have another range, the range is defined in the function creating the graph/chart.
+* The combined geoJSON data file was too large to upload to GitHub. In order to let the site work via GitHub, two JSON files, each containing 10 years of the total 20, were made and are merged in the JavaScript script, in the function mergeJSONS.
+* The slider steps are now dependent of the time scale (which is dependent of the input geoJSON data). This ensures that steps are roughly one month, independent of how many months of data are given. However this is still buggy, so a better solution should be found (perhaps using the abilities of D3 time scales).
+* The functions sortTime and convertToLists are written in order to get the data in the right format for making a line graph. This formatting will probably also turn out useful for other types of charts/graphs.
+* It would be nice if the data loaded into the JavaScript script needn't be in the same directory, so that it could be stored in the Data directory. However, using ../Data/filename doesn't work. So for the time being, the data is kept in the code directory. 

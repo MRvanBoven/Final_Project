@@ -13,7 +13,9 @@
  * Loads in local JSON data file and hands it to main.
  */
 window.onload = function() {
-    let requests = [d3.json("geoJSONs_1998.json"),
+
+    let requests = [d3.json("geoJSONs_1998-2007.json"),
+                    d3.json("geoJSONs_2008-2017.json"),
                     d3.json("ice_area+gg(1998-2017).json")];
 
     // load in JSON data file
@@ -31,20 +33,15 @@ window.onload = function() {
  * Main function, started once a successful response has been received.
  */
 function main(response) {
-    let maps = response[0],
-        iceAndGg = response[1];
+    let maps1 = response[0],
+        maps2 = response[1],
+        iceAndGg = response[2];
 
-    // define svg dimensions
-    let w = (window.innerWidth * 0.95) / 2;
-    let h = w;
-    let margins = {top: 0.05 * w, bottom: 0.05 * h,
-                   left: 0.05 * w, right: 0.05 * w},
-        width = (w - margins.left - margins.right),
-        height = (h - margins.top - margins.bottom);
-    let dims = {w: w, h: h, margins: margins, width: width, height: height};
+    // merge map JSONs into one json object
+    let maps = mergeJSONS(maps1, maps2);
 
     // make a map of default month, january 1998
-    makeMap(maps["01"]["1998"], dims);
+    makeMap(maps["01"]["1998"]);
 
     // get list of chronologically sorted time values
     let times = sortTime(maps);
@@ -53,13 +50,13 @@ function main(response) {
     let iceGgLists = convertToLists(iceAndGg, times);
 
     // make scales for time, ice, and greenhouse gases
-    let scales = makeScales(times, iceGgLists, dims);
+    let scales = makeScales(times, iceGgLists);
 
     // make a time slider, connected to map
-    makeSlider(scales["Time"], dims, maps);
+    makeSlider(scales["Time"], maps);
 
     // make a line chart, showing ice extent data by default
-    makeLineChart(iceGgLists["Extent"], dims, scales["Extent"]);
+    makeLineChart(iceGgLists["Extent"], scales["Time"], scales["Extent"]);
 }
 
 
@@ -67,20 +64,20 @@ function main(response) {
  * Makes time scale from input times, and scales for all variables in input
  * dataLists. Returns all scales in object, with variable name as key.
  */
-function makeScales(times, dataLists, dims) {
+function makeScales(times, dataLists) {
     let scales = {};
 
     // make scales for all variables in data
     for (i in dataLists) {
         scales[i] = d3.scaleLinear()
-                      .domain(d3.extent(dataLists[i], y => y["value"]))
-                      .range([dims.height, 0]);
+                      .domain(d3.extent(dataLists[i], y => y["value"]));
+                      // .range([dims.height, 0]);
     }
 
     // add a time scale, made from the input times
     scales["Time"] = d3.scaleTime()
                        .domain(d3.extent(times))
-                       .range([0, dims.width])
+                       // .range([0, dims.width])
                        .clamp(true);
 
     return(scales);
@@ -90,10 +87,19 @@ function makeScales(times, dataLists, dims) {
 /**
  * Makes a line chart of given input data.
  */
-function makeLineChart(data, dims, yScale) {
-    xScale1 = d3.scaleTime()
-               .domain(d3.extent(data, d => d["date"]))
-               .range([0, dims.width * 2]);
+function makeLineChart(data, xScale, yScale) {
+    // xScale1 = d3.scaleTime()
+    //            .domain(d3.extent(data, d => d["date"]))
+    //            .range([0, dims.width * 2]);
+
+    let w = document.getElementById("line-chart-div").offsetWidth;
+        h = w * 0.5;
+    let margins = {top: 0.10 * h, bottom: 0.05 * h,
+                   left: 0.05 * w, right: 0.05 * w};
+    let dims = {margins: margins, width: w, height: h};
+
+    xScale.range([0, w]);
+    yScale.range([h, 0]);
 
     let parseTime = d3.timeParse("%Y-%m");
 
@@ -101,22 +107,22 @@ function makeLineChart(data, dims, yScale) {
     let svg = d3.select("#line-chart-div")
                 .append("svg")
                 .attr("class", "lineChart")
-                .attr("width", dims.w * 2)
-                .attr("height", dims.h);
+                .attr("width", w)
+                .attr("height", h);
 
     let g = svg.append("g")
                .attr("class", "line-chart")
-               .attr("transform", "translate(" + dims.margins.left
+               .attr("transform", "translate(" + margins.left
                                                + ","
-                                               + dims.margins.top
+                                               + margins.top
                                                + ")");
 
     // make axes
-    axes(svg, xScale1, yScale, dims);
+    axes(svg, xScale, yScale, dims);
 
     let line = d3.line()
                  .x(function(d) {
-                      return xScale1(d["date"]);
+                      return xScale(d["date"]);
                   })
                  .y(function(d) {
                       return yScale(d["value"]);
@@ -137,7 +143,7 @@ function makeLineChart(data, dims, yScale) {
 
     // define properties of dots
     dots.attr("cx", function(d) {
-             return xScale1(d["date"]);
+             return xScale(d["date"]);
          })
         .attr("cy", function(d) {
              return yScale(d["value"]);
@@ -278,21 +284,27 @@ function sortTime(json) {
 /**
  * Makes a map of input geojson.
  */
-function makeMap(map, dims) {
+function makeMap(map) {
+    // define dimensions
+    let w = document.getElementById("map-div").offsetWidth * 0.9,
+        h = w * 0.7;
+    let margins = {top: 0.10 * h, bottom: 0.05 * h,
+                   left: 0.05 * w, right: 0.05 * w};
+
     // create SVG element
     let svg = d3.select("#map-div")
                 .append("svg")
                 .attr("class", "map")
-                .attr("width", dims.w)
-                .attr("height", dims.h);
+                .attr("width", w)
+                .attr("height", h);
 
     // define map projection, ensuring top view of the arctic
     let projection = d3.geoAzimuthalEquidistant()
                        .center([0, 0])
-                       .scale(dims.w * 0.6)
+                       .scale(w * 0.6)
                        .rotate([0, -90, 0])
-                       .translate([dims.width / 2 + dims.margins.left,
-                                   dims.height / 2 + dims.margins.top]);
+                       .translate([w / 2 + margins.left,
+                                   h / 2 + margins.top]);
 
     // define geoPath
     let geoPath = d3.geoPath()
@@ -314,10 +326,18 @@ function makeMap(map, dims) {
  * Makes a slider via which the user can choose of which month data is shown.
  * Code based on example by Jane Pong. Source: https://bit.ly/2RK1wcH.
  */
-function makeSlider(xScale, dims, maps) {
+function makeSlider(xScale, maps) {
     // define slider svg dimensions
-    let h = 100;
-    let w = dims.width + dims.margins.left + dims.margins.right;
+    let margins = {top: 5, bottom: 5,
+                   left: 10, right: 10};
+    let w = document.getElementById("slider-div").offsetWidth,
+        wInner = w - margins.left - margins.right;
+        h = 100;
+    // let dims = {margins: margins, width: w, height: h};
+
+    console.log(document.getElementById("slider-div").offsetWidth);
+
+    xScale.range([0, wInner]);
 
     // define time formatters
     let formatYear = d3.timeFormat("%Y");
@@ -332,7 +352,7 @@ function makeSlider(xScale, dims, maps) {
     let playButton = d3.select("#play-button");
 
     // create SVG element and add slider
-    let svg = d3.select("#slider")
+    let svg = d3.select("#slider-div")
                 .append("svg")
                 .attr("width", w)
                 .attr("height", h);
@@ -340,7 +360,7 @@ function makeSlider(xScale, dims, maps) {
     let slider = svg.append("g")
                     .attr("class", "slider")
                     .attr("transform",
-                          "translate(" + dims.margins.left + "," + h / 2 + ")");
+                          "translate(" + margins.left + "," + h / 2 + ")");
 
     // create slider line and define what happens when dragging the slider
     let track = slider.append("line")
@@ -372,7 +392,7 @@ function makeSlider(xScale, dims, maps) {
           .data(xScale.ticks())
           .enter()
           .append("text")
-          // .attr("class", "ticks")
+          .attr("class", "ticks")
           .attr("x", xScale)
           .attr("y", h / 4)
           .attr("text-anchor", "middle")
@@ -399,7 +419,7 @@ function makeSlider(xScale, dims, maps) {
                    }
                    else {
                        moving = true;
-                       timer = setInterval(step, 400);
+                       timer = setInterval(step, 100);
                        button.text("Pause");
                    }
                });
@@ -412,8 +432,7 @@ function makeSlider(xScale, dims, maps) {
         updateSlider(xScale.invert(currentValue));
         updateMap(maps,
                   formatMonth(xScale.invert(currentValue)),
-                  formatYear(xScale.invert(currentValue)),
-                  dims);
+                  formatYear(xScale.invert(currentValue)));
     }
 
     /**
@@ -423,12 +442,11 @@ function makeSlider(xScale, dims, maps) {
         updateSlider(xScale.invert(currentValue));
         updateMap(maps,
                   formatMonth(xScale.invert(currentValue)),
-                  formatYear(xScale.invert(currentValue)),
-                  dims);
+                  formatYear(xScale.invert(currentValue)));
 
-        currentValue = currentValue + dims.width / (xScale.ticks().length + 1);
+        currentValue = currentValue + wInner / xScale.ticks(d3.timeMonth).length;
 
-        if (currentValue > dims.width) {
+        if (currentValue > wInner) {
             moving = false;
             currentValue = 0;
             clearInterval(timer);
@@ -453,7 +471,7 @@ function makeSlider(xScale, dims, maps) {
 /**
  * Updates map via a transition to given month's map.
  */
-function updateMap(maps, month, year, dims) {
+function updateMap(maps, month, year) {
     let map = maps[month][year];
     console.log("update");
 
@@ -461,7 +479,7 @@ function updateMap(maps, month, year, dims) {
     let svg = d3.select(".map");
     svg.remove();
 
-    makeMap(map, dims);
+    makeMap(map);
 
     // transition??
     // g.selectAll("path")
@@ -473,4 +491,18 @@ function updateMap(maps, month, year, dims) {
      //          return arc(interpol(t));
      //      }
      //  });
+}
+
+
+/**
+ * Merges two input JSON objects into the first. Returns the merged JSON object.
+ */
+function mergeJSONS(JSON1, JSON2) {
+    for (month in JSON2) {
+        for (year in JSON2[month]) {
+            JSON1[month][year] = JSON2[month][year];
+        }
+    }
+
+    return JSON1;
 }

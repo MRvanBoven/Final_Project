@@ -8,9 +8,34 @@
  */
 
 
-#play-button {
+/* define general HTML elements and classes styles */
+body {
+    color: #EAEAEA;
+    font-family: sans-serif;
+    background-color: #232323;
+}
+h2.title {
     position: relative;
-    top: -45px;
+    top: -50px;
+    height: 0px;
+    width: 1000px;
+    font-size: 100px;
+    color: #EAEAEA;
+}
+p.student {
+    font-variant: small-caps;
+    font-weight: bold;
+}
+p.conclusion {
+    position: relative;
+    float: left;
+}
+
+
+#play-button {
+    font-size: 12px;
+    position: relative;
+    top: 33px;
     left: 0px;
     background: #f08080;
     padding-right: 26px;
@@ -49,7 +74,7 @@
     pointer-events: stroke;
     stroke-width: 50px;
     stroke: transparent;
-    cursor: crosshair;
+    cursor: pointer;
 }
 
 .handle {
@@ -85,30 +110,5 @@
 /* line chart */
 .line {
     fill: none;
-    stroke-width: 2;    
-}
-
-
-/* define general HTML elements and classes styles */
-body {
-    color: #EAEAEA;
-    font-family: 'Abel';
-    background-color: #232323;
-}
-h2.title {
-    position: relative;
-    top: -50px;
-    height: 0px;
-    width: 1000px;
-    font-size: 100px;
-    color: #EAEAEA;
-    font-family: 'StarTrek';
-}
-p.student {
-    font-variant: small-caps;
-    font-weight: bold;
-}
-p.conclusion {
-    position: relative;
-    float: left;
+    stroke-width: 2;
 }

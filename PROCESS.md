@@ -60,4 +60,12 @@
 * The combined geoJSON data file was too large to upload to GitHub. In order to let the site work via GitHub, two JSON files, each containing 10 years of the total 20, were made and are merged in the JavaScript script, in the function mergeJSONS.
 * The slider steps are now dependent of the time scale (which is dependent of the input geoJSON data). This ensures that steps are roughly one month, independent of how many months of data are given. However this is still buggy, so a better solution should be found (perhaps using the abilities of D3 time scales).
 * The functions sortTime and convertToLists are written in order to get the data in the right format for making a line graph. This formatting will probably also turn out useful for other types of charts/graphs.
-* It would be nice if the data loaded into the JavaScript script needn't be in the same directory, so that it could be stored in the Data directory. However, using ../Data/filename doesn't work. So for the time being, the data is kept in the code directory. 
+* It would be nice if the data loaded into the JavaScript script needn't be in the same directory, so that it could be stored in the Data directory. However, using ../Data/filename doesn't work. So for the time being, the data is kept in the code directory.
+
+## Day 11.5
+* Let y axis of line graph start on 0, to give better first glance view on the problem. An extra plus is that it also makes it easier to (dynamically) add (and remove) multiple lines in one chart.
+* Icon 'buttons' initiated, not linked to line chart yet.
+* Color scale added, also made in makeScales function, for script clarity and easy access. 
+* Ideas to improve data comparison of ice extent (from showing site to a friend):
+  * Show outline of largest extent (of all used data or of current month) in background of map, to see reduction in size.
+  * Add grid to line chart.

@@ -57,6 +57,48 @@ function main(response) {
 
     // make a line chart, showing ice extent data by default
     makeLineChart(iceGgLists["Extent"], scales["Time"], scales["Extent"]);
+
+    // make
+    makeIcons(iceGgLists, scales);
+}
+
+
+/**
+ *
+ */
+function makeIcons(iceGgLists, scales) {
+    // define svg dimensions, margins, inner graph dimensions
+    let w = document.getElementById("CH4").offsetWidth,
+        h = w / 2;
+    let margins = {top: 20, bottom: 0,
+                   left: 40, right: 10};
+    let wInner = w - margins.left - margins.right,
+        hInner = wInner / 2;
+
+    for (variable in iceGgLists) {
+        console.log(variable);
+        let svg = d3.select(`#${variable}`)
+                    .append("svg")
+                    .attr("class", "icon")
+                    .attr("width", w)
+                    .attr("height", h);
+
+        let g = svg.append('g')
+                   .attr("id", `${variable}-g`)
+                   .attr("transform", "translate(" + margins.left
+                                                   + ","
+                                                   + margins.top
+                                                   + ")");
+
+        let rect = g.append("rect")
+                    .attr("width", wInner)
+                    .attr("height", hInner);
+
+        rect.style("fill", function() {
+                  return scales["Color"](variable);
+             });
+
+    }
 }
 
 
@@ -70,15 +112,29 @@ function makeScales(times, dataLists) {
     // make scales for all variables in data
     for (i in dataLists) {
         scales[i] = d3.scaleLinear()
-                      .domain(d3.extent(dataLists[i], y => y["value"]));
-                      // .range([dims.height, 0]);
+                      .domain([0, d3.max(dataLists[i], y => y["value"])]);
     }
 
     // add a time scale, made from the input times
     scales["Time"] = d3.scaleTime()
                        .domain(d3.extent(times))
-                       // .range([0, dims.width])
                        .clamp(true);
+
+    // define color scale
+    scales["Color"] = d3.scaleOrdinal()
+                        .domain(function() {
+                             let dom = [];
+                             for (i in iceGgLists) {
+                                    dom.push(i);
+                             }
+                             return dom;
+                         })
+                        .range(["#980C1D",
+                                "#C34D3A",
+                                "#3B83A5",
+                                "#246084",
+                                "#0F3C6B",
+                                "#FFFFFF"]);
 
     return(scales);
 }
@@ -88,18 +144,17 @@ function makeScales(times, dataLists) {
  * Makes a line chart of given input data.
  */
 function makeLineChart(data, xScale, yScale) {
-    // xScale1 = d3.scaleTime()
-    //            .domain(d3.extent(data, d => d["date"]))
-    //            .range([0, dims.width * 2]);
+    // define svg dimensions, margins, inner graph dimensions
+    let w = document.getElementById("line-chart-div").offsetWidth,
+        h = w * 0.6;
+    let margins = {top: 40, bottom: 40,
+                   left: 40, right: 5};
+    let wInner = w - margins.left - margins.right,
+        hInner = h - margins.top - margins.bottom;
+    let dims = {margins: margins, width: wInner, height: hInner};
 
-    let w = document.getElementById("line-chart-div").offsetWidth;
-        h = w * 0.5;
-    let margins = {top: 0.10 * h, bottom: 0.05 * h,
-                   left: 0.05 * w, right: 0.05 * w};
-    let dims = {margins: margins, width: w, height: h};
-
-    xScale.range([0, w]);
-    yScale.range([h, 0]);
+    xScale.range([0, wInner]);
+    yScale.range([hInner, 0]);
 
     let parseTime = d3.timeParse("%Y-%m");
 
@@ -228,7 +283,7 @@ function axes(svg, xScale, yScale, dims) {
 
     // add label x axis
     svg.append("text")
-       .attr("class", "label")
+       .attr("class", "axis label")
        .attr("x", dims.margins.left + dims.width / 2)
        .attr("y", dims.margins.top + dims.height + dims.margins.bottom)
        .style("text-anchor", "middle")
@@ -236,12 +291,12 @@ function axes(svg, xScale, yScale, dims) {
 
     // add label y axis
     svg.append("text")
-       .attr("class", "label")
+       .attr("class", "axis label")
        .attr("transform", "rotate(-90)")
        .attr("x", - dims.margins.top - dims.height / 2)
        .attr("y", dims.margins.left / 5)
        .style("text-anchor", "middle")
-       .text("Different axes? :O At least: Ice Area (perhaps downward?)");
+       .text("Different axes?");
 }
 
 /**
@@ -331,11 +386,8 @@ function makeSlider(xScale, maps) {
     let margins = {top: 5, bottom: 5,
                    left: 10, right: 10};
     let w = document.getElementById("slider-div").offsetWidth,
-        wInner = w - margins.left - margins.right;
+        wInner = w - margins.left - margins.right,
         h = 100;
-    // let dims = {margins: margins, width: w, height: h};
-
-    console.log(document.getElementById("slider-div").offsetWidth);
 
     xScale.range([0, wInner]);
 
@@ -498,6 +550,7 @@ function updateMap(maps, month, year) {
  * Merges two input JSON objects into the first. Returns the merged JSON object.
  */
 function mergeJSONS(JSON1, JSON2) {
+    // add geoJSONs from JSON2 to corresponding month in JSON1, under key year
     for (month in JSON2) {
         for (year in JSON2[month]) {
             JSON1[month][year] = JSON2[month][year];

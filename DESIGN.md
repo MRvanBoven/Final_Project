@@ -11,13 +11,11 @@
 * A __map__ showing the monthly arctic ice coverage (or extent), for any month in 1979 to 2018. The map will be made from a GeoJSON file, and in D3-geo.
 * A __slider__ will allow the user to define the month of which the map is shown. The slider can be built with D3 drag.
   * A play button for the slider, added in HTML.
-* A dropdown menu, allowing the user to choose a month to only show data of.
+* A __dropdown menu__, allowing the user to choose a month to only show data of.
 * A __line chart__, showing the ice extent by default, to which lines can be added (and from which they can be deleted), by clicking an animal icon (or an emission type).
-* Animal icons (or emission types, indicated by chemical formulas), along with an ice icon, with the animal population, amount of emission, or ice coverage area data, from the month of which the map is shown.
-* If emissions: perhaps a pie chart showing the distribution of the main human emissions.
+* Animal __icons__ (or emission types, indicated by chemical formulas), along with an ice icon, with the animal population, amount of emission, or ice coverage area data, from the month of which the map is shown.
+* If emissions: perhaps a __pie chart__ showing the distribution of the main human emissions.
 
-## Used D3 Plugins
-* D3 geo (is this a plugin?)
-* (D3 drag)
-* D3 time format
-* Bootstap (not D3 plugin)
+## Used Plugins
+* Bootstap
+* [GeoConverter](https://geoconverter.hsr.ch/) for converting shapefiles to GeoJSONs in WGS84 coordinates
